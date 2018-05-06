@@ -111,7 +111,7 @@ const runTransition = () => {
 
         // Initialize the slides animation
         const canvasBackgroundDarkenAnimation = new TweenLite.to('#canvas', 0.7, {backgroundColor: 'rgba(0, 0, 0, 0.4)'})
-        const secondSlidePullDownAnimation = new TweenLite.to('#slide-2', 0.7, {y: 0})
+        const secondSlidePullDownAnimation = new TweenLite.to('#slide-2', 0.6, {y: 0})
 
         // Initialize Timelines
         const ropeEnterTimeline = new TimelineLite()
