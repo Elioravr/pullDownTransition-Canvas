@@ -20,6 +20,10 @@ const runTransition = () => {
   const HAND_AFTER_GRABBING_Y_OFFSET_FROM_GRABBING_HAND = 50
   const HAND_COVERING_PART_WIDTH = HAND_AFTER_GRABBING_Y_OFFSET_FROM_GRABBING_HAND
   const HAND_FIRST_POSITION_Y = 100
+  const BEFORE_PULLING_DOWN_OFFSET = 50
+  const HAND_CATCHING_ROPE_OFFSET_X = 52
+  const HAND_CATCHING_ROPE_OFFSET_Y = 58
+  const HAND_COVERING_PART_CATCHING_ROPE_OFFSET_Y = 80
 
   const initTransition = () => {
     const canvas = document.getElementById('canvas')
@@ -36,15 +40,15 @@ const runTransition = () => {
     ropeSpriteImage.src = './images/rope-sprite.png'
 
     const ropeBeforeFalling = {
-      xpos: CANVAS_WIDTH / 2,
+      xpos: CANVAS_WIDTH / 2 - BEFORE_PULLING_DOWN_OFFSET,
       ypos: 0,
       rotation: getRadianDegree(ROPE_ENTER_START_ANGLE),
       opacity: 1
     }
 
     const ropeAfterFalling = {
-      xpos: CANVAS_WIDTH / 2,
-      ypos: 0,
+      xpos: CANVAS_WIDTH / 2 - BEFORE_PULLING_DOWN_OFFSET,
+      ypos: -HAND_COVERING_PART_WIDTH / 2,
       rotation: getRadianDegree(ROPE_ENTER_REPLACEMENT_ANGLE),
       opacity: 0
     }
@@ -57,14 +61,14 @@ const runTransition = () => {
     }
 
     const handAfterGrabbing = {
-      xpos: CANVAS_WIDTH - HAND_IMAGE_WIDTH + HAND_AFTER_GRABBING_SOURCE_X,
-      ypos: HAND_FIRST_POSITION_Y + HAND_AFTER_GRABBING_Y_OFFSET_FROM_GRABBING_HAND,
+      xpos: CANVAS_WIDTH - HAND_IMAGE_WIDTH + HAND_AFTER_GRABBING_SOURCE_X + HAND_CATCHING_ROPE_OFFSET_X,
+      ypos: HAND_FIRST_POSITION_Y + HAND_AFTER_GRABBING_Y_OFFSET_FROM_GRABBING_HAND + HAND_CATCHING_ROPE_OFFSET_Y,
       opacity: 0
     }
 
     const handCoveringPart = {
-      xpos: CANVAS_WIDTH / 2,
-      ypos: CANVAS_HEIGHT / 2,
+      xpos: CANVAS_WIDTH / 2 - HAND_COVERING_PART_WIDTH / 2,
+      ypos: CANVAS_HEIGHT / 2 - HAND_COVERING_PART_CATCHING_ROPE_OFFSET_Y,
       opacity: 0
     }
 
@@ -85,8 +89,8 @@ const runTransition = () => {
         })
 
         const handBeforeGrabbingEnterAnimation = new TweenLite.to(handBeforeGrabbing, 0.7, {
-          xpos: CANVAS_WIDTH - HAND_IMAGE_WIDTH,
-          ypos: HAND_FIRST_POSITION_Y,
+          xpos: CANVAS_WIDTH - HAND_IMAGE_WIDTH + HAND_CATCHING_ROPE_OFFSET_X,
+          ypos: HAND_FIRST_POSITION_Y + HAND_CATCHING_ROPE_OFFSET_Y,
           rotation: getRadianDegree(HAND_ENTER_END_ANGLE)
         })
 
@@ -95,11 +99,15 @@ const runTransition = () => {
         const handCoveringPartAppearingAnimation = new TweenLite.to(handCoveringPart, 0.0001, {opacity: 1})
 
         // Initialize exit animations
-        const handAfterGrabbingExitAnimation = new TweenLite.to(handAfterGrabbing, 0.7, {ypos: handAfterGrabbing.ypos + CANVAS_HEIGHT})
-        const handCoveringPartExitAnimation = new TweenLite.to(handCoveringPart, 0.7, {ypos: handCoveringPart.ypos + CANVAS_HEIGHT})
+        const handAfterGrabbingBeforeExitAnimation = new TweenLite.to(handAfterGrabbing, 0.3, {ypos: handAfterGrabbing.ypos - BEFORE_PULLING_DOWN_OFFSET})
+        const handCoveringPartBeforeExitAnimation = new TweenLite.to(handCoveringPart, 0.3, {ypos: handCoveringPart.ypos - BEFORE_PULLING_DOWN_OFFSET})
         // We should remember that the rope is 90deg rotated,
         // so in order to pull it down we need to manipulate it's x instead of it's y
-        const ropeAfterFallingExitAnimation = new TweenLite.to(ropeAfterFalling, 0.7, {xpos: ropeAfterFalling.xpos + CANVAS_HEIGHT})
+        const ropeAfterFallingBeforeExitAnimation = new TweenLite.to(ropeAfterFalling, 0.3, {xpos: ropeAfterFalling.xpos - BEFORE_PULLING_DOWN_OFFSET})
+
+        const handAfterGrabbingExitAnimation = new TweenLite.to(handAfterGrabbing, 0.7, {ypos: handAfterGrabbing.ypos + CANVAS_HEIGHT + BEFORE_PULLING_DOWN_OFFSET})
+        const handCoveringPartExitAnimation = new TweenLite.to(handCoveringPart, 0.7, {ypos: handCoveringPart.ypos + CANVAS_HEIGHT + BEFORE_PULLING_DOWN_OFFSET})
+        const ropeAfterFallingExitAnimation = new TweenLite.to(ropeAfterFalling, 0.7, {xpos: ropeAfterFalling.xpos + CANVAS_HEIGHT + BEFORE_PULLING_DOWN_OFFSET})
 
 
         // Initialize Timelines
@@ -121,11 +129,17 @@ const runTransition = () => {
 
         const pullingDownTimeline = new TimelineLite()
 
-        pullingDownTimeline.add([
-          handAfterGrabbingExitAnimation,
-          handCoveringPartExitAnimation,
-          ropeAfterFallingExitAnimation
-        ])
+        pullingDownTimeline
+          .add([
+            handAfterGrabbingBeforeExitAnimation,
+            handCoveringPartBeforeExitAnimation,
+            ropeAfterFallingBeforeExitAnimation
+          ])
+          .add([
+            handAfterGrabbingExitAnimation,
+            handCoveringPartExitAnimation,
+            ropeAfterFallingExitAnimation
+          ])
 
         const mainTimeline = new TimelineLite()
         mainTimeline
