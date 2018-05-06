@@ -15,7 +15,10 @@ const runTransition = () => {
   const ROPE_AFTER_GRABBING_SOURCE_X = 120
   const HAND_AFTER_GRABBING_SOURCE_X = 40
   const HAND_AFTER_GRABBING_SOURCE_Y = HAND_IMAGE_BEFORE_GRABBING_HEIGHT
+  const HAND_COVERING_PART_SOURCE_X = 0
+  const HAND_COVERING_PART_SOURCE_Y = HAND_AFTER_GRABBING_SOURCE_Y
   const HAND_AFTER_GRABBING_Y_OFFSET_FROM_GRABBING_HAND = 50
+  const HAND_COVERING_PART_WIDTH = HAND_AFTER_GRABBING_Y_OFFSET_FROM_GRABBING_HAND
   const HAND_FIRST_POSITION_Y = 100
 
   const initTransition = () => {
@@ -59,6 +62,12 @@ const runTransition = () => {
       opacity: 0
     }
 
+    const handCoveringPart = {
+      xpos: CANVAS_WIDTH / 2,
+      ypos: CANVAS_HEIGHT / 2,
+      opacity: 0
+    }
+
     ropeSpriteImage.onload = () => {
       handSpriteImage.onload = () => {
         const ropeBeforeFallingEnterAnimation = new TweenLite.to(ropeBeforeFalling, 0.5, {
@@ -82,6 +91,7 @@ const runTransition = () => {
 
         const handBeforeGrabbingDisappearingAnimation = new TweenLite.to(handBeforeGrabbing, 0.0001, {opacity: 0})
         const handAfterGrabbingAppearingAnimation = new TweenLite.to(handAfterGrabbing, 0.0001, {opacity: 1})
+        const handCoveringPartAppearingAnimation = new TweenLite.to(handCoveringPart, 0.0001, {opacity: 1})
 
         const ropeEnterTimeline = new TimelineLite()
 
@@ -97,6 +107,7 @@ const runTransition = () => {
           .add(handBeforeGrabbingEnterAnimation)
           .add(handBeforeGrabbingDisappearingAnimation)
           .add(handAfterGrabbingAppearingAnimation)
+          .add(handCoveringPartAppearingAnimation)
 
         const mainTimeline = new TimelineLite()
 
@@ -117,6 +128,45 @@ const runTransition = () => {
 
     const animate = () => {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+      ctx.save()
+
+      // Draw the hand before grabbing
+      ctx.translate(CANVAS_WIDTH, CANVAS_HEIGHT / 2)
+      ctx.rotate(handBeforeGrabbing.rotation)
+      ctx.translate(-CANVAS_WIDTH, -(CANVAS_HEIGHT / 2))
+      ctx.globalAlpha = handBeforeGrabbing.opacity
+
+      ctx.drawImage(
+        handSpriteImage,
+        0,
+        0,
+        HAND_IMAGE_WIDTH,
+        HAND_IMAGE_BEFORE_GRABBING_HEIGHT,
+        handBeforeGrabbing.xpos,
+        handBeforeGrabbing.ypos,
+        HAND_IMAGE_WIDTH,
+        HAND_IMAGE_BEFORE_GRABBING_HEIGHT
+      )
+
+      ctx.restore()
+      ctx.save()
+
+      // Draw the hand after grabbing
+      ctx.globalAlpha = handAfterGrabbing.opacity
+
+      ctx.drawImage(
+        handSpriteImage,
+        HAND_AFTER_GRABBING_SOURCE_X,
+        HAND_AFTER_GRABBING_SOURCE_Y,
+        HAND_IMAGE_WIDTH,
+        HAND_IMAGE_AFTER_GRABBING_HEIGHT,
+        handAfterGrabbing.xpos,
+        handAfterGrabbing.ypos,
+        HAND_IMAGE_WIDTH,
+        HAND_IMAGE_AFTER_GRABBING_HEIGHT
+      )
+
+      ctx.restore()
       ctx.save()
 
       // Draw the before falling rope
@@ -163,42 +213,23 @@ const runTransition = () => {
       ctx.restore()
       ctx.save()
 
-      // Draw the hand before grabbing
-      ctx.translate(CANVAS_WIDTH, CANVAS_HEIGHT / 2)
-      ctx.rotate(handBeforeGrabbing.rotation)
-      ctx.translate(-CANVAS_WIDTH, -(CANVAS_HEIGHT / 2))
-      ctx.globalAlpha = handBeforeGrabbing.opacity
+      // Draw the hand covering part
+      ctx.globalAlpha = handCoveringPart.opacity
 
       ctx.drawImage(
         handSpriteImage,
-        0,
-        0,
-        HAND_IMAGE_WIDTH,
-        HAND_IMAGE_BEFORE_GRABBING_HEIGHT,
-        handBeforeGrabbing.xpos,
-        handBeforeGrabbing.ypos,
-        HAND_IMAGE_WIDTH,
-        HAND_IMAGE_BEFORE_GRABBING_HEIGHT
+        HAND_COVERING_PART_SOURCE_X,
+        HAND_COVERING_PART_SOURCE_Y,
+        HAND_COVERING_PART_WIDTH,
+        HAND_IMAGE_AFTER_GRABBING_HEIGHT,
+        handCoveringPart.xpos,
+        handCoveringPart.ypos,
+        HAND_COVERING_PART_WIDTH,
+        HAND_IMAGE_AFTER_GRABBING_HEIGHT
       )
 
       ctx.restore()
       ctx.save()
-
-      // Draw the hand after grabbing
-      ctx.globalAlpha = handAfterGrabbing.opacity
-
-      ctx.drawImage(
-        handSpriteImage,
-        HAND_AFTER_GRABBING_SOURCE_X,
-        HAND_AFTER_GRABBING_SOURCE_Y,
-        HAND_IMAGE_WIDTH,
-        HAND_IMAGE_AFTER_GRABBING_HEIGHT,
-        handAfterGrabbing.xpos,
-        handAfterGrabbing.ypos,
-        HAND_IMAGE_WIDTH,
-        HAND_IMAGE_AFTER_GRABBING_HEIGHT
-      )
-
     }
   }
 
