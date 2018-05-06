@@ -7,9 +7,11 @@ const runTransition = () => {
   const HAND_ENTER_START_ANGLE = -30
   const HAND_ENTER_END_ANGLE = 0
   const ROPE_ENTER_START_ANGLE = 20
+  const ROPE_ENTER_REPLACEMENT_ANGLE = 70
   const ROPE_ENTER_END_ANGLE = 90
   const ROPE_IMAGE_WIDTH = 1800
   const ROPE_BEFORE_FALLING_HEIGHT = 200
+  const ROPE_AFTER_FALLING_HEIGHT = 100
   const ROPE_AFTER_GRABBING_SOURCE_X = 120
   const HAND_AFTER_GRABBING_SOURCE_X = 40
   const HAND_AFTER_GRABBING_SOURCE_Y = HAND_IMAGE_BEFORE_GRABBING_HEIGHT
@@ -37,6 +39,13 @@ const runTransition = () => {
       opacity: 1
     }
 
+    const ropeAfterFalling = {
+      xpos: CANVAS_WIDTH / 2,
+      ypos: 0,
+      rotation: getRadianDegree(ROPE_ENTER_REPLACEMENT_ANGLE),
+      opacity: 0
+    }
+
     const handBeforeGrabbing = {
       xpos: CANVAS_WIDTH,
       ypos: CANVAS_HEIGHT,
@@ -52,8 +61,17 @@ const runTransition = () => {
 
     ropeSpriteImage.onload = () => {
       handSpriteImage.onload = () => {
-        const ropeBeforeFallingAnimation = new TweenLite.to(ropeBeforeFalling, 0.7, {
-          rotation: getRadianDegree(ROPE_ENTER_END_ANGLE)
+        const ropeBeforeFallingEnterAnimation = new TweenLite.to(ropeBeforeFalling, 0.5, {
+          rotation: getRadianDegree(ROPE_ENTER_REPLACEMENT_ANGLE),
+          ease: Power2.easeIn
+        })
+
+        const ropeBeforeFallingDisappearingAnimation = new TweenLite.to(ropeBeforeFalling, 0.0001, {opacity: 0})
+        const ropeAfterFallingAppearingAnimation = new TweenLite.to(ropeAfterFalling, 0.0001, {opacity: 1})
+
+        const ropeAfterFallingEnterAnimation = new TweenLite.to(ropeAfterFalling, 0.2, {
+          rotation: getRadianDegree(ROPE_ENTER_END_ANGLE),
+          ease: Power2.easeOut
         })
 
         const handBeforeGrabbingEnterAnimation = new TweenLite.to(handBeforeGrabbing, 0.7, {
@@ -65,24 +83,32 @@ const runTransition = () => {
         const handBeforeGrabbingDisappearingAnimation = new TweenLite.to(handBeforeGrabbing, 0.0001, {opacity: 0})
         const handAfterGrabbingAppearingAnimation = new TweenLite.to(handAfterGrabbing, 0.0001, {opacity: 1})
 
-        const timeline = new TimelineLite({
-          paused: true,
-          onReverseComplete: () => console.log('reverse completeeeeeeeeeee')
-        })
+        const ropeEnterTimeline = new TimelineLite()
 
-        timeline.add([ropeBeforeFallingAnimation, handBeforeGrabbingEnterAnimation])
-          // .add(handBeforeGrabbingEnterAnimation,0)
+        ropeEnterTimeline
+          .add(ropeBeforeFallingEnterAnimation)
+          .add(ropeBeforeFallingDisappearingAnimation)
+          .add(ropeAfterFallingAppearingAnimation)
+          .add(ropeAfterFallingEnterAnimation)
+
+        const handEnterTimeline = new TimelineLite()
+
+        handEnterTimeline
+          .add(handBeforeGrabbingEnterAnimation)
           .add(handBeforeGrabbingDisappearingAnimation)
           .add(handAfterGrabbingAppearingAnimation)
 
-        timeline.play()
+        const mainTimeline = new TimelineLite()
+
+        mainTimeline.add([ropeEnterTimeline, handEnterTimeline])
 
         TweenLite.ticker.addEventListener('tick', animate)
+
         canvas.addEventListener('click', () => {
-          if (timeline.reversed()) {
-              timeline.play()
+          if (mainTimeline.reversed()) {
+              mainTimeline.play()
           } else {
-              timeline.reverse()
+              mainTimeline.reverse()
           }
         })
       }
@@ -93,7 +119,7 @@ const runTransition = () => {
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
       ctx.save()
 
-      // Draw the rope
+      // Draw the before falling rope
       ctx.translate(CANVAS_WIDTH / 2, 0)
       ctx.scale(-1,1)
       ctx.rotate(ropeBeforeFalling.rotation)
@@ -110,6 +136,28 @@ const runTransition = () => {
         ropeBeforeFalling.ypos,
         ROPE_IMAGE_WIDTH / 3.2,
         ROPE_BEFORE_FALLING_HEIGHT / 3.2
+      )
+
+      ctx.restore()
+      ctx.save()
+
+      // Draw the after falling rope
+      ctx.translate(CANVAS_WIDTH / 2, 0)
+      ctx.scale(-1,1)
+      ctx.rotate(ropeAfterFalling.rotation)
+      ctx.translate(-(CANVAS_WIDTH / 2), 0)
+      ctx.globalAlpha = ropeAfterFalling.opacity
+
+      ctx.drawImage(
+        ropeSpriteImage,
+        0,
+        0,
+        ROPE_IMAGE_WIDTH,
+        ROPE_AFTER_FALLING_HEIGHT,
+        ropeAfterFalling.xpos,
+        ropeAfterFalling.ypos,
+        ROPE_IMAGE_WIDTH / 3.2,
+        ROPE_AFTER_FALLING_HEIGHT / 3.2
       )
 
       ctx.restore()
