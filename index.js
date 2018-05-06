@@ -70,6 +70,7 @@ const runTransition = () => {
 
     ropeSpriteImage.onload = () => {
       handSpriteImage.onload = () => {
+        // Initialize enter animations
         const ropeBeforeFallingEnterAnimation = new TweenLite.to(ropeBeforeFalling, 0.5, {
           rotation: getRadianDegree(ROPE_ENTER_REPLACEMENT_ANGLE),
           ease: Power2.easeIn
@@ -93,6 +94,15 @@ const runTransition = () => {
         const handAfterGrabbingAppearingAnimation = new TweenLite.to(handAfterGrabbing, 0.0001, {opacity: 1})
         const handCoveringPartAppearingAnimation = new TweenLite.to(handCoveringPart, 0.0001, {opacity: 1})
 
+        // Initialize exit animations
+        const handAfterGrabbingExitAnimation = new TweenLite.to(handAfterGrabbing, 0.7, {ypos: handAfterGrabbing.ypos + CANVAS_HEIGHT})
+        const handCoveringPartExitAnimation = new TweenLite.to(handCoveringPart, 0.7, {ypos: handCoveringPart.ypos + CANVAS_HEIGHT})
+        // We should remember that the rope is 90deg rotated,
+        // so in order to pull it down we need to manipulate it's x instead of it's y
+        const ropeAfterFallingExitAnimation = new TweenLite.to(ropeAfterFalling, 0.7, {xpos: ropeAfterFalling.xpos + CANVAS_HEIGHT})
+
+
+        // Initialize Timelines
         const ropeEnterTimeline = new TimelineLite()
 
         ropeEnterTimeline
@@ -109,9 +119,18 @@ const runTransition = () => {
           .add(handAfterGrabbingAppearingAnimation)
           .add(handCoveringPartAppearingAnimation)
 
-        const mainTimeline = new TimelineLite()
+        const pullingDownTimeline = new TimelineLite()
 
-        mainTimeline.add([ropeEnterTimeline, handEnterTimeline])
+        pullingDownTimeline.add([
+          handAfterGrabbingExitAnimation,
+          handCoveringPartExitAnimation,
+          ropeAfterFallingExitAnimation
+        ])
+
+        const mainTimeline = new TimelineLite()
+        mainTimeline
+          .add([ropeEnterTimeline, handEnterTimeline])
+          .add(pullingDownTimeline)
 
         TweenLite.ticker.addEventListener('tick', animate)
 
