@@ -4,13 +4,15 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: #333;
 }
 
 .main-container {
   width: 1024px;
   height: 576px;
-  border: 1px solid #ccc;
+  /*border: 1px solid #ccc;*/
   position: relative;
+  background: white;
 }
 
 .slide {
