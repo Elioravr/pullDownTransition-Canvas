@@ -145,19 +145,20 @@ const runTransition = () => {
             secondSlidePullDownAnimation
           ])
 
-        const mainTimeline = new TimelineLite()
+        const mainTimeline = new TimelineLite({
+          paused: true
+        })
+
         mainTimeline
           .add([ropeEnterTimeline, handEnterTimeline])
           .add([pullingDownTimeline, canvasBackgroundDarkenAnimation])
 
+        setTimeout(() => mainTimeline.play(), 100)
+
         TweenLite.ticker.addEventListener('tick', animate)
 
         document.getElementById('main-container').addEventListener('click', () => {
-          if (mainTimeline.reversed()) {
-              mainTimeline.play()
-          } else {
-              mainTimeline.reverse()
-          }
+          mainTimeline.restart()
         })
       }
     }
