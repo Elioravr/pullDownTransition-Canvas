@@ -109,6 +109,9 @@ const runTransition = () => {
         const handCoveringPartExitAnimation = new TweenLite.to(handCoveringPart, 0.7, {ypos: handCoveringPart.ypos + CANVAS_HEIGHT + BEFORE_PULLING_DOWN_OFFSET})
         const ropeAfterFallingExitAnimation = new TweenLite.to(ropeAfterFalling, 0.7, {xpos: ropeAfterFalling.xpos + CANVAS_HEIGHT + BEFORE_PULLING_DOWN_OFFSET})
 
+        // Initialize the slides animation
+        const canvasBackgroundDarkenAnimation = new TweenLite.to('#canvas', 0.7, {backgroundColor: 'rgba(0, 0, 0, 0.4)'})
+        const secondSlidePullDownAnimation = new TweenLite.to('#slide-2', 0.7, {y: 0})
 
         // Initialize Timelines
         const ropeEnterTimeline = new TimelineLite()
@@ -138,17 +141,18 @@ const runTransition = () => {
           .add([
             handAfterGrabbingExitAnimation,
             handCoveringPartExitAnimation,
-            ropeAfterFallingExitAnimation
+            ropeAfterFallingExitAnimation,
+            secondSlidePullDownAnimation
           ])
 
         const mainTimeline = new TimelineLite()
         mainTimeline
           .add([ropeEnterTimeline, handEnterTimeline])
-          .add(pullingDownTimeline)
+          .add([pullingDownTimeline, canvasBackgroundDarkenAnimation])
 
         TweenLite.ticker.addEventListener('tick', animate)
 
-        canvas.addEventListener('click', () => {
+        document.getElementById('main-container').addEventListener('click', () => {
           if (mainTimeline.reversed()) {
               mainTimeline.play()
           } else {

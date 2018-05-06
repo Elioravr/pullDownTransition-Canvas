@@ -7,12 +7,13 @@ html, body {
   background: #333;
 }
 
-.main-container {
+#main-container {
   width: 1024px;
   height: 576px;
   /*border: 1px solid #ccc;*/
   position: relative;
   background: white;
+  overflow: hidden;
 }
 
 .slide {
@@ -21,15 +22,22 @@ html, body {
   left: 0;
   right: 0;
   bottom: 0;
-  display: none;
 }
 
 #slide-1 {
   background: #1389E4;
   transform: translateY(0px);
+  z-index: 0;
 }
 
 #slide-2 {
   background: #78909C;
-  transform: translateY(0px);
+  /*opacity: 0;*/
+  transform: translateY(-576px);
+  z-index: 100;
+}
+
+#canvas {
+  position: absolute;
+  z-index: 10;
 }
